@@ -1,0 +1,83 @@
+<html>
+	<body>
+      <div id="sse">
+		 <ul id="messages"></ul>
+		<form action="">
+			<input id="m" autocomplete="off" /><button>Send</button>
+		</form>
+      </div>
+   </body>	
+
+   <head>
+   <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: white; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 1; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { border: 1; width: 9%; background: white;  padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: white; }
+    </style>
+	  <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+      <script type="text/javascript">
+	   var ws = new WebSocket("ws://52.4.239.43:1337");
+	   
+	    $( document ).ready(function() {
+				
+               ws.onopen = function()
+               {
+                  // Web Socket is connected, send data using send()
+				  
+               };
+				
+               ws.onmessage = function (evt) 
+               { 
+                  var returnObj = JSON.parse(evt.data);
+				  
+				  if (JSON.parse(evt.data).type == 'history')
+				  {
+					  var messages = returnObj.data;
+					  
+					  messages.forEach(function(msg) {
+						$('#messages').append($('<li>').text(msg.userName + ': ' + msg.text))
+					  });
+				  }	
+				  
+				  if (JSON.parse(evt.data).type == 'message')
+				  {
+					var message = returnObj.data;
+					if (message != null)
+						$('#messages').append($('<li>').text(message.userName + ': ' + message.text))
+				  }
+               };
+				
+               ws.onclose = function()
+               { 
+                  // websocket is closed.
+               };
+        });
+	  
+		$('form').submit(function(){
+			//socket.emit('chat message', $('#m').val());
+			
+			var msg = {
+				type: "message",
+				text: $('#m').val(),
+				userName: "El Jefe"
+			  };
+
+			  //ws.send("Message to send");
+			  ws.send(JSON.stringify(msg));
+			
+			$('#m').val('');
+			return false;
+		  });
+		
+      </script>
+		
+   </head>
+	
+   
+	
+</html>
