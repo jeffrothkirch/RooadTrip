@@ -6,10 +6,13 @@
 </head>
 <body>
 
-<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <script>
 var ws = new WebSocket("ws://52.4.239.43:1337");
-	   var userName = "";
+var userName = "";
+var userFbId = 0;
 
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
@@ -79,10 +82,13 @@ var ws = new WebSocket("ws://52.4.239.43:1337");
     FB.api('/me', function(response) {
 	  $(fbButton).hide();
 	  $(status).hide();
+	  $(map).show();
+	  $(panel).show();
 	  //$(roadtripchat).show();
 	  $(fbDiv).hide();
 	  //$(map).show();
 	  userName = response.name;
+	  userFbId = response.id;
       console.log('Successful login for: ' + response.name);
       //document.getElementById('status').innerHTML ='Thanks for logging in, ' + response.name + '!';
     });
@@ -91,7 +97,9 @@ var ws = new WebSocket("ws://52.4.239.43:1337");
 	   
 	$( document ).ready(function() {
 		
-		$(roadtripchat).hide();			
+		$(roadtripchat).hide();	
+		$(map).hide();
+		$(panel).hide();		
 		//$(map).hide();
 				
 	   ws.onopen = function()
@@ -126,6 +134,18 @@ var ws = new WebSocket("ws://52.4.239.43:1337");
 		  // websocket is closed.
 	   };
 	});
+	  
+	  function LoadFriends()
+	{
+		FB.api("/" + userFbId + "/friendlists",
+			//"/{friendlist-id}",
+			function (response) {
+			  if (response && !response.error) {
+				/* handle the result */
+			  }
+			}
+		);
+	}
 	  
 		$('form').submit(function(){
 			//socket.emit('chat message', $('#m').val());
@@ -169,8 +189,7 @@ var ws = new WebSocket("ws://52.4.239.43:1337");
 			
 			return false;
 		  }
-		
-      </script>
+</script>
 	  
 <script>
   var map;
@@ -182,6 +201,8 @@ function initMap() {
     center: {lat: -34.397, lng: 150.644},
     zoom: 8
   });
+  
+  $(map).hide();
   
   // Create the autocomplete object, restricting the search to geographical
   // location types.
@@ -212,6 +233,11 @@ function initMap() {
   // fields in the form.
   autocomplete.addListener('place_changed', onChangeHandler);
   autocomplete2.addListener('place_changed', onChangeHandler);
+  
+  var selectedMode = document.getElementById('mode');
+  selectedMode.onchange = onChangeHandler;
+  
+  
 } 
 
 function calculateAndDisplayRoute(directionsDisplay, directionsService,
@@ -226,10 +252,12 @@ function calculateAndDisplayRoute(directionsDisplay, directionsService,
   
   if (place2 != null & place != null)
   {
+      var selectedMode = document.getElementById('mode').value;
+	  
 	   directionsService.route({
 		origin: place.formatted_address,
 		destination: place2.formatted_address,
-		travelMode: google.maps.TravelMode.DRIVING
+		travelMode: selectedMode //google.maps.TravelMode.DRIVING
 	  }, function(response, status) {
 		// Route the directions and pass the response to a function to create
 		// markers for each step.
@@ -331,8 +359,41 @@ function attachInstructionText(stepDisplay, marker, text, map) {
 <td>
     <input id="autocomplete2" placeholder="Destination address" onFocus="geolocate()" type="text"></input>
 </td>
+<td>
+<select id="mode">
+      <option value="DRIVING">Driving</option>
+      <option value="WALKING">Walking</option>
+      <option value="BICYCLING">Bicycling</option>
+      <option value="TRANSIT">Transit</option>
+	  <option value="AIRPLANE">Airplane</option>
+    </select>
+</td>
+<td>
+<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" id="fbModal" onclick="LoadFriends()" >Open Modal</button>
+</td>
 </tr>
   </table>
+</div>
+
+<!-- Modal -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Add Facebook Friends!</h4>
+      </div>
+      <div class="modal-body">
+        <p>You got no friends son.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 </body>
@@ -374,5 +435,7 @@ function attachInstructionText(stepDisplay, marker, text, map) {
 #panel select, #panel input, .panel select, .panel input {  font-size: 15px;}
 
 #panel i, .panel i {  font-size: 12px;}
+
+#fbModal { height=100px;background-color=white;}
     </style>
 </html>
