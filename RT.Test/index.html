@@ -23,10 +23,12 @@ var userFbId = 0;
       testAPI();
     } else if (response.status === 'not_authorized') {
       // The person is logged into Facebook, but not your app.
-      document.getElementById('status').innerHTML = 'Please log ' + 'into this app.';
+	  $('#loginModal').modal('show');
+      //document.getElementById('status').innerHTML = 'Please log ' + 'into this app.';
     } else {
+	  $('#loginModal').modal('show');
       // The person is not logged into Facebook, so we're not sure if they are logged into this app or not.
-      document.getElementById('status').innerHTML = 'Please log ' +  'into Facebook.';
+      //document.getElementById('status').innerHTML = 'Please log ' +  'into Facebook.';
     }
   }
 
@@ -80,7 +82,7 @@ var userFbId = 0;
   function testAPI() {
     console.log('Welcome!  Fetching your information.... ');
     FB.api('/me', function(response) {
-	  $(fbButton).hide();
+	  //$(fbButton).hide();
 	  $(status).hide();
 	  $(map).show();
 	  $(panel).show();
@@ -101,6 +103,7 @@ var userFbId = 0;
 		$(map).hide();
 		$(panel).hide();		
 		//$(map).hide();
+		//$('#fbFriendsModal').modal('show');
 				
 	   ws.onopen = function()
 	   {
@@ -137,8 +140,7 @@ var userFbId = 0;
 	  
 	  function LoadFriends()
 	{
-		FB.api("/" + userFbId + "/friendlists",
-			//"/{friendlist-id}",
+		FB.api("/me/friends",
 			function (response) {
 			  if (response && !response.error) {
 				/* handle the result */
@@ -319,7 +321,7 @@ function attachInstructionText(stepDisplay, marker, text, map) {
  
 
 <script src="https://maps.googleapis.com/maps/api/js?libraries=places&callback=initMap" async defer></script>
-<div style="text-align:center;margin:auto;" id="fbDiv">
+<!-- <div style="text-align:center;margin:auto;" id="fbDiv">
 <table>
 <tr>
 <td>
@@ -333,7 +335,7 @@ function attachInstructionText(stepDisplay, marker, text, map) {
 </td>
 </tr>
   </table>
-</div>
+</div> -->
 
 <!-- <div id="status" style="text-align:center;margin:auto;"/> -->
 
@@ -369,14 +371,14 @@ function attachInstructionText(stepDisplay, marker, text, map) {
     </select>
 </td>
 <td>
-<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" id="fbModal" onclick="LoadFriends()" >Open Modal</button>
+<button type="button" class="btnFbFriends" data-toggle="modal" data-target="#fbFriendsModal" id="findFriendsModal" onclick="LoadFriends()" > <img src="/images/addfriend.png" height="20" width="20"></img></button>
 </td>
 </tr>
   </table>
 </div>
 
 <!-- Modal -->
-<div id="myModal" class="modal fade" role="dialog">
+<div id="fbFriendsModal" class="modal fade" role="dialog">
   <div class="modal-dialog">
 
     <!-- Modal content-->
@@ -385,11 +387,44 @@ function attachInstructionText(stepDisplay, marker, text, map) {
         <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h4 class="modal-title">Add Facebook Friends!</h4>
       </div>
-      <div class="modal-body">
-        <p>You got no friends son.</p>
+      <div class="modal-body" >
+	  
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="loginModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Login!</h4>
+      </div>
+      <div class="modal-body">
+        <table class="displayTable">
+			<tr>
+			<td>
+				Welcome to RooadTrip. Please login using Facebook below.
+			</td>
+			</tr>
+
+			<tr>
+			<td>
+			<fb:login-button scope="public_profile,email" onlogin="checkLoginState();" id="fbButton"/>
+			</td>
+			</tr>
+		  </table>
+      </div>
+      <div class="modal-footer">
+        <!-- <button type="button" class="btn btn-default" data-dismiss="modal">Close</button> -->
       </div>
     </div>
 
@@ -403,6 +438,10 @@ function attachInstructionText(stepDisplay, marker, text, map) {
       form { background: white; padding: 3px; position: fixed; bottom: 0; width: 100%; }
       form input { border: 1; padding: 10px; width: 90%; margin-right: .5%; margin-bottom: 0px; }
       form button { border: 1; width: 9%; background: white;  padding: 10px; }
+	  
+	  .btnFbFriends {border:0px; background:white; margin-left: 5px;}
+	  
+	  #messages { visibility: hidden; }
       #messages { list-style-type: none; margin: 0; padding: 0; margin-bottom: 100px;}
       #messages li { padding: 5px 10px; }
       #messages li:nth-child(odd) { background: white; }
@@ -436,6 +475,8 @@ function attachInstructionText(stepDisplay, marker, text, map) {
 
 #panel i, .panel i {  font-size: 12px;}
 
-#fbModal { height=100px;background-color=white;}
+#fbFriendsModal { height=100px;background-color=white;}
+.displayTable { margin: auto; width: 70%;   padding: 10px;}
+#fbButton { margin: auto; width: 70%;   padding: 10px;}
     </style>
 </html>
